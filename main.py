@@ -11,7 +11,7 @@
 
 
 import streamlit as st
-from streamlit_webrtc import webrtc_streamer
+from streamlit_webrtc import webrtc_streamer, VideoHTMLAttributes
 import av
 import numpy as np
 import mediapipe as mp
@@ -20,11 +20,14 @@ mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
-#st.set_page_config(layout="wide")
+# st.set_page_config(layout="wide")
 st.title("ABMA Live")
 
+
 def video_frame_callback(frame):
-    with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
+    with mp_pose.Pose(
+        min_detection_confidence=0.5, min_tracking_confidence=0.5
+    ) as pose:
         image = frame.to_ndarray(format="bgr24")
         results = pose.process(image)
         image.flags.writeable = True
@@ -38,4 +41,10 @@ def video_frame_callback(frame):
         return av.VideoFrame.from_ndarray(flipped, format="bgr24")
 
 
-webrtc_streamer(key="example", video_frame_callback=video_frame_callback)
+webrtc_streamer(
+    key="example",
+    video_frame_callback=video_frame_callback,
+    video_html_attrs=VideoHTMLAttributes(
+        autoPlay=True, controls=True, style={"width": "100%"}, muted=True
+    ),
+)
