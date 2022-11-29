@@ -1,56 +1,42 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Mar 14 16:48:27 2022
-
-@author: Iver Cristi Sánchez
+@file    : ARBA-LIVE
+@brief   : Live streaming version of ARBA neural.
+@date    : 2022/11/29
+@version : 1.0.0
+@author  : Lucas Cortés.
+@contact : lucas.cortes@lanek.cl
+@bug     : None.
 """
 
 
-import cv2
 import streamlit as st
-import mediapipe as mp
+from streamlit_webrtc import webrtc_streamer
+import av
 import numpy as np
-
+import mediapipe as mp
+import cv2
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
-# dsize=(1280,720)
-st.set_page_config(layout="wide")
+
+#st.set_page_config(layout="wide")
 st.title("ABMA Live")
 
-run = st.checkbox("Run")
-FRAME_WINDOW = st.image([])
-cap = cv2.VideoCapture(0)
-
-
-with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
-    while run:
-        success, image = cap.read()
-        if not success:
-            print("Ignoring empty camera frame.")
-            # If loading a video, use 'break' instead of 'continue'.
-            continue
-
-        # To improve performance, optionally mark the image as not writeable to
-        # pass by reference.
-        image.flags.writeable = False
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+def video_frame_callback(frame):
+    with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
+        image = frame.to_ndarray(format="bgr24")
         results = pose.process(image)
-
-        # Draw the pose annotation on the image.
         image.flags.writeable = True
-        # image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         mp_drawing.draw_landmarks(
             image,
             results.pose_landmarks,
             mp_pose.POSE_CONNECTIONS,
             landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style(),
         )
-        # Flip the image horizontally for a selfie-view display.
-        # image=cv2.resize(image,dsize)
-        # print(image.shape)
-        image = cv2.flip(image, 1)
-        FRAME_WINDOW.image(image, use_column_width=True)
-        # else:
-        #    st.write('Stopped')
+        flipped = np.flip(image, axis=1)#img[::-1,:,:] if flip else img
+        return av.VideoFrame.from_ndarray(flipped, format="bgr24")
+
+
+webrtc_streamer(key="example", video_frame_callback=video_frame_callback)
