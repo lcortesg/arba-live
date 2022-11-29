@@ -1,7 +1,6 @@
 streamlit
 streamlit-webrtc
 streamlit-camera-input-live
-opencv-python-headless
 numpy
 mediapipe
 black

@@ -15,7 +15,6 @@ from streamlit_webrtc import webrtc_streamer
 import av
 import numpy as np
 import mediapipe as mp
-import cv2
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -35,7 +34,7 @@ def video_frame_callback(frame):
             mp_pose.POSE_CONNECTIONS,
             landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style(),
         )
-        flipped = np.flip(image, axis=1)#img[::-1,:,:] if flip else img
+        flipped = np.flip(image, axis=1)
         return av.VideoFrame.from_ndarray(flipped, format="bgr24")
 
 
