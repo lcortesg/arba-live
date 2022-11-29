@@ -1,5 +1,5 @@
 streamlit
-opencv-contrib-python-headles
+opencv-python-headless
 numpy
 mediapipe
 black
